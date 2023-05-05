@@ -64,6 +64,11 @@ def get_parser():
     )
 
     parser.add_argument(
+        "--submit",
+        help="A file or directory to save submit file. "
+        "If not given, default '/content/output/'",
+    )
+    parser.add_argument(
         "--confidence-threshold",
         type=float,
         default=0.5,
