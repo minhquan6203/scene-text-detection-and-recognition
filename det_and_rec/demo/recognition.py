@@ -6,11 +6,7 @@ from vietocr.tool.config import Cfg
 
 def get_config():
     config = Cfg.load_config_from_name('vgg_transformer')
-<<<<<<< HEAD
     config['weights'] = '/content/drive/MyDrive/train_rec/weight/transformerorc_weights_best_trans_data_plus.pth'
-=======
-    config['weights'] = '/content/drive/MyDrive/train_rec/transformerorc_weights_best.pth'
->>>>>>> cdfd474ee47ae610337a5d0b1b076025c3104004
     config['cnn']['pretrained']=False
     config['device'] = 'cuda:0'
     config['predictor']['beamsearch']=False
@@ -30,13 +26,8 @@ def predict(img_path, bboxs):
     for bbox in bboxs:
       try:
         cropped_img = img.crop(bbox)
-<<<<<<< HEAD
         file_name=img_path.replace('/content/images_total_data/','')
         cropped_img.save('/content/crop_img/'+file_name)
-=======
-        file_name=img_path.replace('/content/uaic2022_public_testA/images/','')
-        cropped_img.save('/content/crop_img/'+file_name.replace('.jpg','')+f"_{id}_test"+".jpg")
->>>>>>> cdfd474ee47ae610337a5d0b1b076025c3104004
         pred = detector.predict(cropped_img)
         result = {'text': pred, 'bbox': convert_to_polygon(bbox)}
         results.append(result)
