@@ -6,7 +6,8 @@ import os
 import time
 import cv2
 import tqdm
-import shutil
+
+import recognition
 
 from detectron2.config import get_cfg
 from detectron2.data.detection_utils import read_image
@@ -68,6 +69,7 @@ def get_parser():
         help="A file or directory to save submit file. "
         "If not given, default '/content/output/'",
     )
+
     parser.add_argument(
         "--confidence-threshold",
         type=float,
@@ -98,18 +100,18 @@ if __name__ == "__main__":
         if len(args.input) == 1:
             args.input = glob.glob(os.path.expanduser(args.input[0]))
             assert args.input, "The input path(s) was not found"
-        path_scene=[]
-        
-        if os.path.exists('/content/scene_img/') == False:
-            os.makedirs('/content/scene_img/')
-        if os.path.exists('/content/no_scene_img/') == False:
-            os.makedirs('/content/no_scene_img/')
-
         for path in tqdm.tqdm(args.input, disable=not args.output):
             # use PIL, to be consistent with evaluation
             img = read_image(path, format="BGR")
             start_time = time.time()
             predictions, visualized_output = demo.run_on_image(img, args.confidence_threshold, path)
+            results = recognition.predict(path, predictions['instances'].pred_boxes.tensor.cpu().numpy())
+            
+            if args.submit:
+                recognition.make_submissions(path, results, args.submit)
+            else:
+                recognition.make_submissions(path, results, '/content/output')
+
             logger.info(
                 "{}: {} in {:.2f}s".format(
                     path,
@@ -119,19 +121,6 @@ if __name__ == "__main__":
                     time.time() - start_time,
                 )
             )
-            if len(predictions["instances"]) != 0:
-              try:
-                shutil.move(path,'/content/scene_img/')
-              except:
-                pass
-            else:
-              try:
-                shutil.move(path,'/content/no_scene_img/')
-              except:
-                pass
-
-
-        
             if args.output:
                 if os.path.isdir(args.output):
                     assert os.path.isdir(args.output), args.output
